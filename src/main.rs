@@ -9,11 +9,23 @@ use axum::{
 use serde::Deserialize;
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
+use clap::Parser;
+
+/// Benchmarking REST API. It is called crust because it burns!
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Args {
+    /// Number of threads to run with
+    #[arg(short, long, default_value_t = 1)]
+    threads: u8,
+}
 
 static TOTAL_HTTP_REQUESTS : Mutex<u64> = Mutex::new(0);
 
 #[tokio::main]
 async fn main() {
+    let args = Args::parse();
+
     let app = Router::new()
         .route("/metrics", get(metrics))
         .route("/burn", get(burn));
