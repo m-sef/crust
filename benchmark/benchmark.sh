@@ -3,7 +3,7 @@
 TARGET_URL="http://$(sudo kubectl get svc crust-service -n crust -o jsonpath='{.spec.clusterIP}')"
 
 while true; do
-    sudo kubectl get hpa -n webserver | tail -n 1 >> "replicas.log" 2>/dev/null
+    sudo kubectl get hpa -n cluster | tail -n 1 >> "replicas.log" 2>/dev/null
     sleep 1
 done &
 WATCHER_PID=$!
