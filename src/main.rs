@@ -17,21 +17,27 @@ use clap::Parser;
 struct Args {
     /// Number of threads to run with
     #[arg(short, long, default_value_t = 1)]
-    threads: u8,
+    threads: usize,
 }
 
 static TOTAL_HTTP_REQUESTS : Mutex<u64> = Mutex::new(0);
 
-#[tokio::main]
-async fn main() {
+fn main() {
     let args = Args::parse();
 
-    let app = Router::new()
-        .route("/metrics", get(metrics))
-        .route("/burn", get(burn));
-    
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
-    axum::serve(listener, app).await.unwrap();
+    tokio::runtime::Builder::new_multi_thread()
+        .worker_threads(args.threads as usize)
+        .enable_all()
+        .build()
+        .unwrap()
+        .block_on(async {
+            let app = Router::new()
+                .route("/metrics", get(metrics))
+                .route("/burn", get(burn));
+
+            let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
+            axum::serve(listener, app).await.unwrap();
+        })
 }
 
 async fn metrics() -> Response {
