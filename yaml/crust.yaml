@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: crust
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: crust-deployment
+  namespace: crust
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: crust
+  template:
+    metadata:
+      labels:
+        app: crust
+    spec:
+      containers:
+      - name: crust
+        image: ghcr.io/m-sef/crust:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: crust-service
+  namespace: crust
+spec:
+  selector:
+    app: crust
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
