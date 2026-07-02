@@ -3,3 +3,5 @@
 
 *.yaml linguist-detectable
 *.yaml linguist-language=YAML
+
+*.ipynb linguist-documentation
