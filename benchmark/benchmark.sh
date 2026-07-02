@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-TARGET_URL="http://$(kubectl get svc webserver-service -n webserver -o jsonpath='{.spec.clusterIP}')"
+TARGET_URL="http://$(kubectl get svc crust-service -n crust -o jsonpath='{.spec.clusterIP}')"
 
 echo "GET ${TARGET_URL}:8080/burn?burn=20"| \
     vegeta attack -rate="10/s" -duration="60s" -keepalive=false | \
