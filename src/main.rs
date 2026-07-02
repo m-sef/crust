@@ -15,6 +15,10 @@ use clap::Parser;
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
+    /// Port to run on
+    #[arg(short, long, default_value_t = 8080)]
+    port: u16,
+
     /// Number of threads to run with
     #[arg(short, long, default_value_t = 1)]
     threads: usize,
@@ -26,7 +30,7 @@ fn main() {
     let args = Args::parse();
 
     tokio::runtime::Builder::new_multi_thread()
-        .worker_threads(args.threads as usize)
+        .worker_threads(args.threads)
         .enable_all()
         .build()
         .unwrap()
@@ -35,7 +39,7 @@ fn main() {
                 .route("/metrics", get(metrics))
                 .route("/burn", get(burn));
 
-            let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
+            let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", args.port)).await.unwrap();
             axum::serve(listener, app).await.unwrap();
         })
 }
