@@ -25,7 +25,7 @@ run_benchmark() {
         # Stable 20 request/sec
         echo "--- Baseline: 20 req/s (1 minute) ---"
         echo "GET ${TARGET_URL}:8080/burn?burn=20"| \
-            vegeta attack -rate="10/s" -duration="60s" -keepalive=false | \
+            vegeta attack -rate="20/s" -duration="60s" -keepalive=false | \
             vegeta encode -to=csv -output="${FOLDER_NAME}/vegeta1.log"
 
         # Ramp up 120 request/sec
