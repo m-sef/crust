@@ -6,4 +6,4 @@ RUN cargo build --release
 FROM alpine
 COPY --from=crust-build /crust/target/release/crust /usr/bin
 EXPOSE 8080
-CMD [ "crust" ]
+CMD [ "crust", "--threads=1", "--port=8080" ]
