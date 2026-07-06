@@ -22,26 +22,36 @@ run_benchmark() {
         done &
         WATCHER_PID=$!
 
-        # Stable 20 request/sec
-        echo "--- Baseline: 20 req/s (1 minute) ---"
+        # Stable 50 request/sec
+        echo "--- Baseline: 50 req/s (1 minute) ---"
         echo "GET ${TARGET_URL}:8080/burn?burn=20"| \
-            vegeta attack -rate="20/s" -duration="60s" -keepalive=false | \
+            vegeta attack -rate="50/s" -duration="60s" -keepalive=false | \
             vegeta encode -to=csv -output="${FOLDER_NAME}/vegeta1.log"
-
-        # Ramp up 120 request/sec
-        echo "--- Spike: 120 req/s (3 minutes) ---"
+        
+        echo "--- Baseline: 75 req/s (1 minute) ---"
         echo "GET ${TARGET_URL}:8080/burn?burn=20"| \
-            vegeta attack -rate="120/s" -duration="180s" -keepalive=false | \
+            vegeta attack -rate="75/s" -duration="60s" -keepalive=false | \
             vegeta encode -to=csv -output="${FOLDER_NAME}/vegeta2.log"
-
-        # Ramp down 20 request/sec
-        echo "--- Cool down: 20 req/s (1 minute) ---"
+        
+        echo "--- Baseline: 100 req/s (1 minute) ---"
         echo "GET ${TARGET_URL}:8080/burn?burn=20"| \
-            vegeta attack -rate="20/s" -duration="60s" -keepalive=false | \
+            vegeta attack -rate="100/s" -duration="60s" -keepalive=false | \
             vegeta encode -to=csv -output="${FOLDER_NAME}/vegeta3.log"
 
-        echo "--- Traffic ramp finished. Monitoring HPA for an extra 5 minutes... ---"
-        sleep 5m
+        ## Ramp up 120 request/sec
+        #echo "--- Spike: 120 req/s (3 minutes) ---"
+        #echo "GET ${TARGET_URL}:8080/burn?burn=20"| \
+        #    vegeta attack -rate="120/s" -duration="180s" -keepalive=false | \
+        #    vegeta encode -to=csv -output="${FOLDER_NAME}/vegeta2.log"
+
+        ## Ramp down 50 request/sec
+        #echo "--- Cool down: 50 req/s (1 minute) ---"
+        #echo "GET ${TARGET_URL}:8080/burn?burn=50"| \
+        #    vegeta attack -rate="50/s" -duration="60s" -keepalive=false | \
+        #    vegeta encode -to=csv -output="${FOLDER_NAME}/vegeta3.log"
+
+        #echo "--- Traffic ramp finished. Monitoring HPA for an extra 5 minutes... ---"
+        #sleep 5m
 
         kill ${WATCHER_PID}
 
@@ -50,6 +60,6 @@ run_benchmark() {
     done
 }
 
-run_benchmark default_hpa $SCRIPT_DIR/../yaml/crust.yaml 5
+run_benchmark default_hpa_experimental $SCRIPT_DIR/../yaml/crust.yaml 2
 
 exit 0
