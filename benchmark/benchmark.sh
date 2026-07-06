@@ -23,20 +23,40 @@ run_benchmark() {
         WATCHER_PID=$!
 
         # Stable 50 request/sec
-        echo "--- Baseline: 50 req/s (1 minute) ---"
+        echo "--- Baseline: 50 req/s (2 minute) ---"
         echo "GET ${TARGET_URL}:8080/burn?burn=20"| \
-            vegeta attack -rate="50/s" -duration="60s" -keepalive=false | \
+            vegeta attack -rate="50/s" -duration="120s" -keepalive=false | \
             vegeta encode -to=csv -output="${FOLDER_NAME}/vegeta1.log"
         
-        echo "--- Baseline: 75 req/s (1 minute) ---"
+        echo "--- Baseline: 75 req/s (2 minute) ---"
         echo "GET ${TARGET_URL}:8080/burn?burn=20"| \
-            vegeta attack -rate="75/s" -duration="60s" -keepalive=false | \
+            vegeta attack -rate="75/s" -duration="120s" -keepalive=false | \
             vegeta encode -to=csv -output="${FOLDER_NAME}/vegeta2.log"
         
-        echo "--- Baseline: 100 req/s (1 minute) ---"
+        echo "--- Baseline: 100 req/s (2 minute) ---"
         echo "GET ${TARGET_URL}:8080/burn?burn=20"| \
-            vegeta attack -rate="100/s" -duration="60s" -keepalive=false | \
+            vegeta attack -rate="100/s" -duration="120s" -keepalive=false | \
             vegeta encode -to=csv -output="${FOLDER_NAME}/vegeta3.log"
+        
+        echo "--- Baseline: 125 req/s (2 minute) ---"
+        echo "GET ${TARGET_URL}:8080/burn?burn=20"| \
+            vegeta attack -rate="125/s" -duration="120s" -keepalive=false | \
+            vegeta encode -to=csv -output="${FOLDER_NAME}/vegeta4.log"
+        
+        echo "--- Baseline: 150 req/s (2 minute) ---"
+        echo "GET ${TARGET_URL}:8080/burn?burn=20"| \
+            vegeta attack -rate="150/s" -duration="120s" -keepalive=false | \
+            vegeta encode -to=csv -output="${FOLDER_NAME}/vegeta5.log"
+        
+        echo "--- Baseline: 175 req/s (2 minute) ---"
+        echo "GET ${TARGET_URL}:8080/burn?burn=20"| \
+            vegeta attack -rate="175/s" -duration="120s" -keepalive=false | \
+            vegeta encode -to=csv -output="${FOLDER_NAME}/vegeta6.log"
+        
+        echo "--- Baseline: 200 req/s (2 minute) ---"
+        echo "GET ${TARGET_URL}:8080/burn?burn=20"| \
+            vegeta attack -rate="200/s" -duration="120s" -keepalive=false | \
+            vegeta encode -to=csv -output="${FOLDER_NAME}/vegeta7.log"
 
         ## Ramp up 120 request/sec
         #echo "--- Spike: 120 req/s (3 minutes) ---"
@@ -60,6 +80,6 @@ run_benchmark() {
     done
 }
 
-run_benchmark default_hpa_experimental $SCRIPT_DIR/../yaml/crust.yaml 2
+run_benchmark default_hpa_experimental $SCRIPT_DIR/../yaml/crust.yaml 1
 
 exit 0
