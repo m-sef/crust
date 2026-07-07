@@ -16,21 +16,11 @@ run_benchmark() {
 
         TARGET_URL="http://$(sudo kubectl get svc crust-service -n crust -o jsonpath='{.spec.clusterIP}')"
 
-        sudo ebpf_probe --interface=enp6s0f0 &
-        EBPF_PROBE_PID=$!
-
         while true; do
             sudo kubectl get hpa -n crust | tail -n 1 >> "${FOLDER_NAME}/replicas.log" 2>/dev/null
             sleep 1
         done &
         WATCHER_PID=$!
-
-        while true; do
-            sudo cat /sys/fs/bpf/ebpf_probe/cpu*/summary >> "${FOLDER_NAME}/cpu_summary.log" 2>/dev/null
-            sudo cat /sys/fs/bpf/ebpf_probe/rapl/* >> "${FOLDER_NAME}/rapl.log" 2>/dev/null
-            sleep 1
-        done &
-        EBPF_PROBE_WATCHER_PID=$!
 
         # Stable 50 request/sec
         echo "--- Baseline: 50 req/s (5 minute) ---"
@@ -93,8 +83,6 @@ run_benchmark() {
         #sleep 5m
 
         kill ${WATCHER_PID}
-        kill ${EBPF_PROBE_PID}
-        kill ${EBPF_PROBE_WATCHER_PID}
 
         sudo kubectl delete -f $YAML
         sudo kubectl wait --for=delete pod --all -n crust --timeout=60s
