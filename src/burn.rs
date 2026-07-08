@@ -15,10 +15,11 @@ pub struct BurnQuery {
 }
 
 pub async fn get_burn(Query(params) : Query<BurnQuery>) -> Response {
-    *TOTAL_HTTP_REQUESTS.lock().unwrap() += 1;
-
     let time_ms = params.burn;
     let time_end = Instant::now() + Duration::from_secs_f64(time_ms / 1000.0);
+
+    // This is probably a pointless optimization; moved code accessing mutex lock inside "burn logic"
+    *TOTAL_HTTP_REQUESTS.lock().unwrap() += 1;
 
     let mut x = 0.0_f64;
     while Instant::now() <= time_end {
