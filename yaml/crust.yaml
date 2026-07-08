@@ -24,6 +24,12 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /metrics
+            port: 8080
+          periodSeconds: 2
+          failureThreshold: 2
         resources:
             requests:
               cpu: "1"
