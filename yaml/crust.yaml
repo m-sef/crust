@@ -25,7 +25,8 @@ spec:
         ports:
         - containerPort: 8080
         readinessProbe:
-          tcpSocket:
+          httpGet:
+            path: /healthy
             port: 8080
           periodSeconds: 2
           failureThreshold: 2
