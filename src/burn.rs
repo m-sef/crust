@@ -14,7 +14,7 @@ pub struct BurnQuery {
     burn: u64,
 }
 
-pub async fn get_burn(Query(params) : Query<BurnQuery>) -> Response {
+pub async fn get_burn_handler(Query(params) : Query<BurnQuery>) -> Response {
     let time_ms = params.burn;
     let time_end = Instant::now() + Duration::from_millis(time_ms);
 

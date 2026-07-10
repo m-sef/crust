@@ -9,9 +9,9 @@ use axum::{
 use clap::Parser;
 use std::{thread, time::Duration};
 
-use crate::metrics::get_metrics;
-use crate::healthy::get_healthy;
-use crate::burn::get_burn;
+use crate::metrics::get_metrics_handler;
+use crate::healthy::get_healthy_handler;
+use crate::burn::get_burn_handler;
 
 /// Benchmarking REST API. It is called crust because it burns!
 #[derive(Parser, Debug)]
@@ -45,9 +45,9 @@ fn main() {
         .unwrap()
         .block_on(async {
             let app = Router::new()
-                .route("/metrics", get(get_metrics))
-                .route("/healthy", get(get_healthy))
-                .route("/burn", get(get_burn));
+                .route("/metrics", get(get_metrics_handler))
+                .route("/healthy", get(get_healthy_handler))
+                .route("/burn", get(get_burn_handler));
 
             let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", args.port)).await.unwrap();
             axum::serve(listener, app).await.unwrap();

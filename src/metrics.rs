@@ -7,7 +7,7 @@ use std::sync::Mutex;
 
 pub static TOTAL_HTTP_REQUESTS : Mutex<u64> = Mutex::new(0);
 
-pub async fn get_metrics() -> Response {
+pub async fn get_metrics_handler() -> Response {
     Response::builder()
         .status(StatusCode::OK)
         .header("Content-Type", "text/plain")
