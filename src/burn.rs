@@ -16,14 +16,20 @@ pub struct BurnQuery {
     burn: u64,
 }
 
-pub async fn get_burn_handler(
-    ConnectInfo(addr): ConnectInfo<SocketAddr>, method: Method, uri: Uri,
-    headers: HeaderMap, Query(params): Query<BurnQuery>) -> Response
+pub async fn 
+get_burn_handler(
+        ConnectInfo(addr): ConnectInfo<SocketAddr>,
+        method: Method,
+        uri: Uri,
+        headers: HeaderMap,
+        Query(params): Query<BurnQuery>) -> Response
 {
     let host = headers
         .get(HOST)
         .and_then(|v| v.to_str().ok())
         .unwrap_or("unknown");
+
+    info!("{} {} http://{}{}", addr, method, host, uri);
 
     let time_ms = params.burn;
     let time_end = Instant::now() + Duration::from_millis(time_ms);
@@ -35,8 +41,6 @@ pub async fn get_burn_handler(
     while Instant::now() <= time_end {
         x += (x + 1.0).sqrt();
     }
-
-    info!("{} {} http://{}{}", addr, method, host, uri);
 
     Response::builder()
         .status(StatusCode::OK)

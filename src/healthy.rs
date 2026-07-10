@@ -4,7 +4,8 @@ use axum::{
     response::Response,
 };
 
-pub async fn get_healthy_handler() -> Response {
+pub async fn
+get_healthy_handler() -> Response {
     Response::builder()
         .status(StatusCode::OK)
         .header("Content-Type", "text/plain")
