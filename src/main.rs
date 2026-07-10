@@ -64,6 +64,6 @@ fn main() {
             let socket = SocketAddr::new(args.ip_address, args.port);
             let listener = tokio::net::TcpListener::bind(socket).await.unwrap();
             info!("Listening on {}", socket);
-            axum::serve(listener, app).await.unwrap();
+            axum::serve(listener, app.into_make_service_with_connect_info::<SocketAddr>()).await.unwrap();
         })
 }

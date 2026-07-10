@@ -1,11 +1,12 @@
 use axum::{
-    http::StatusCode,
+    http::{header::HOST, HeaderMap, Method, StatusCode, Uri},
     body::Body,
-    extract::Query,
+    extract::{ConnectInfo, Query},
     response::Response,
 };
 use serde::Deserialize;
 use log::{info};
+use std::net::SocketAddr;
 use std::time::{Duration, Instant};
 
 use crate::metrics::TOTAL_HTTP_REQUESTS;
@@ -15,7 +16,15 @@ pub struct BurnQuery {
     burn: u64,
 }
 
-pub async fn get_burn_handler(Query(params) : Query<BurnQuery>) -> Response {
+pub async fn get_burn_handler(
+    ConnectInfo(addr): ConnectInfo<SocketAddr>, method: Method, uri: Uri,
+    headers: HeaderMap, Query(params): Query<BurnQuery>) -> Response
+{
+    let host = headers
+        .get(HOST)
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("unknown");
+
     let time_ms = params.burn;
     let time_end = Instant::now() + Duration::from_millis(time_ms);
 
@@ -27,7 +36,7 @@ pub async fn get_burn_handler(Query(params) : Query<BurnQuery>) -> Response {
         x += (x + 1.0).sqrt();
     }
 
-    info!("burn={}, {}", time_ms, x);
+    info!("{} {} http://{}{}", addr, method, host, uri);
 
     Response::builder()
         .status(StatusCode::OK)
