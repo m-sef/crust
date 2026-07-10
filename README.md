@@ -23,16 +23,18 @@ sudo kubectl apply -f yaml/crust.yaml
 
 ## Usage
 
-```bash
+```
 Benchmarking REST API. It is called crust because it burns!
 
 Usage: crust [OPTIONS]
 
 Options:
-  -p, --port <PORT>        Port to run on [default: 8080]
-  -t, --threads <THREADS>  Number of threads to run with [default: 1]
-  -h, --help               Print help
-  -V, --version            Print version
+  -i, --ip-address <IP_ADDRESS>        IP Address to bind to [default: 0.0.0.0]
+  -p, --port <PORT>                    Port to bind to [default: 8080]
+  -t, --threads <THREADS>              Number of threads to run with [default: 1]
+  -s, --startup-delay <STARTUP_DELAY>  Time in ms to delay startup
+  -h, --help                           Print help
+  -V, --version                        Print version
 ```
 
 ## REST API

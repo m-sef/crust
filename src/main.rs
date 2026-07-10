@@ -7,6 +7,9 @@ use axum::{
     Router,
 };
 use clap::Parser;
+use log::{info};
+
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::{thread, time::Duration};
 
 use crate::metrics::get_metrics_handler;
@@ -17,7 +20,11 @@ use crate::burn::get_burn_handler;
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
-    /// Port to run on
+    /// IP Address to bind to
+    #[arg(short, long, default_value_t = IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)))]
+    ip_address: IpAddr,
+
+    /// Port to bind to
     #[arg(short, long, default_value_t = 8080)]
     port: u16,
 
@@ -26,15 +33,20 @@ struct Args {
     threads: usize,
 
     /// Time in ms to delay startup
-    #[arg(long)]
+    #[arg(short, long)]
     startup_delay: Option<u64>,
 }
 
 fn main() {
+    env_logger::init();
+
     let args = Args::parse();
 
     match &args.startup_delay {
-        Some(startup_delay_ms) => thread::sleep(Duration::from_millis(*startup_delay_ms)),
+        Some(startup_delay_ms) => {
+            info!("Startup Delay: {}ms", *startup_delay_ms);
+            thread::sleep(Duration::from_millis(*startup_delay_ms));
+        }
         None => (),
     }
 
@@ -49,7 +61,9 @@ fn main() {
                 .route("/healthy", get(get_healthy_handler))
                 .route("/burn", get(get_burn_handler));
 
-            let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", args.port)).await.unwrap();
+            let socket = SocketAddr::new(args.ip_address, args.port);
+            let listener = tokio::net::TcpListener::bind(socket).await.unwrap();
+            info!("Listening on {}", socket);
             axum::serve(listener, app).await.unwrap();
         })
 }

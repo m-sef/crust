@@ -5,6 +5,7 @@ use axum::{
     response::Response,
 };
 use serde::Deserialize;
+use log::{info};
 use std::time::{Duration, Instant};
 
 use crate::metrics::TOTAL_HTTP_REQUESTS;
@@ -26,7 +27,7 @@ pub async fn get_burn_handler(Query(params) : Query<BurnQuery>) -> Response {
         x += (x + 1.0).sqrt();
     }
 
-    println!("burn={}, {}", time_ms, x);
+    info!("burn={}, {}", time_ms, x);
 
     Response::builder()
         .status(StatusCode::OK)
