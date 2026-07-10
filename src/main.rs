@@ -7,6 +7,7 @@ use axum::{
     Router,
 };
 use clap::Parser;
+use std::{thread, time::Duration};
 
 use crate::metrics::get_metrics;
 use crate::healthy::get_healthy;
@@ -23,10 +24,19 @@ struct Args {
     /// Number of threads to run with
     #[arg(short, long, default_value_t = 1)]
     threads: usize,
+
+    /// Time in ms to delay startup
+    #[arg(long)]
+    startup_delay: Option<u64>,
 }
 
 fn main() {
     let args = Args::parse();
+
+    match &args.startup_delay {
+        Some(startup_delay_ms) => thread::sleep(Duration::from_millis(*startup_delay_ms)),
+        None => (),
+    }
 
     tokio::runtime::Builder::new_multi_thread()
         .worker_threads(args.threads)
