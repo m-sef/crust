@@ -9,7 +9,7 @@ metadata:
   name: crust-deployment
   namespace: crust
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: crust
@@ -48,23 +48,3 @@ spec:
   - protocol: TCP
     port: 8080
     targetPort: 8080
----
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: crust-hpa
-  namespace: crust
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: crust-deployment
-  minReplicas: 2
-  maxReplicas: 10
-  metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 50
