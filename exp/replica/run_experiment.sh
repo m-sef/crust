@@ -30,6 +30,7 @@ run_experiment() {
         sudo kubectl wait --for=condition=Ready pod --all -n crust --timeout=60s
 
         for rps in "${RPS_LIST[@]}"; do
+            echo "--- Replicas: ${i}, RPS: ${RPS} ---"
             run_rate "${rps}" "10s" "${SCRIPT_DIR}/results/${i}_${rps}.log"
         done
     done
