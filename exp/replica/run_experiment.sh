@@ -2,7 +2,10 @@
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 BURN=20
-RPS_LIST=(10 20 30 40 50 60 70 80 90 100 110 120 130 140 150 160 170 180 190 200)
+RPS_LIST=(10)
+WORKER=10.10.1.1
+WORKER_IF=enp6s0f0
+SSH_OPTS="-o StrictHostKeyChecking=no"
 
 run_rate() {
     local RATE=$1
@@ -31,7 +34,20 @@ run_experiment() {
 
         for rps in "${RPS_LIST[@]}"; do
             echo "--- Replicas: ${i}, RPS: ${rps} ---"
-            run_rate "${rps}" "10s" "${SCRIPT_DIR}/results/${i}_${rps}.log"
+
+            FOLDER_NAME="${SCRIPT_DIR}/results/${i}_${rps}"
+            mkdir -p $FOLDER_NAME
+
+            # Start eBPF Probe on worker node
+            ssh $SSH_OPTS $WORKER "sudo /local/ebpf-probe/build/ebpf_probe -i ${WORKER_IF}"
+
+            run_rate "${rps}" "10s" "${FOLDER_NAME}/vegeta.log"
+
+            ssh $SSH_OPTS $WORKER "sudo bash -c 'cat /sys/fs/bpf/ebpf_probe/cpu*/summary'"      > "${FOLDER_NAME}/summary.log"
+            ssh $SSH_OPTS $WORKER "sudo bash -c 'cat /sys/fs/bpf/ebpf_probe/cpu*/${WORKER_IF}'" > "${FOLDER_NAME}/${WORKER_IF}.log"
+
+            # Kill eBPF Probe on worker node to reset stats
+            ssh $SSH_OPTS $WORKER "sudo pkill -f ebpf_probe"
         done
     done
 

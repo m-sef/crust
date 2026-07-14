@@ -1,3 +1,5 @@
 /target
-/exp/results/*
 .venv
+# Ignore raw experiment results in order to reduce git history size
+/exp/autoscaler/results/*
+/exp/replica/results/*
