@@ -2,7 +2,7 @@
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 BURN=20
-RPS_LIST=(10)
+RPS_LIST=(25 50 75 100 125 150 175 200 225 250 275 300 325 350 375 400 425 450 475 500)
 WORKER=10.10.1.1
 WORKER_IF=enp6s0f0
 SSH_OPTS="-o StrictHostKeyChecking=no"
