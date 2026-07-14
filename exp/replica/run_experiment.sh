@@ -39,7 +39,8 @@ run_experiment() {
             mkdir -p $FOLDER_NAME
 
             # Start eBPF Probe on worker node
-            ssh $SSH_OPTS $WORKER "sudo /local/ebpf-probe/build/ebpf_probe -i ${WORKER_IF}"
+            ssh $SSH_OPTS $WORKER "sudo /local/ebpf-probe/build/ebpf_probe -i ${WORKER_IF}" 2>&1 &
+            EBPF_PROBE_PID=$!
 
             run_rate "${rps}" "10s" "${FOLDER_NAME}/vegeta.log"
 
@@ -48,6 +49,8 @@ run_experiment() {
 
             # Kill eBPF Probe on worker node to reset stats
             ssh $SSH_OPTS $WORKER "sudo pkill -f ebpf_probe"
+
+            kill ${EBPF_PROBE_PID}
         done
     done
 
