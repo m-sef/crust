@@ -2,7 +2,6 @@
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 BURN=20
-RPS_LIST=(25 50 75 100 125 150 175 200 225 250 275 300 325 350 375 400 425 450 475 500)
 WORKER=10.10.1.1
 WORKER_IF=enp6s0f0
 SSH_OPTS="-o StrictHostKeyChecking=no"
@@ -32,7 +31,7 @@ run_experiment() {
         sudo kubectl scale deployment "${NAME}" -n crust --replicas="${i}"
         sudo kubectl wait --for=condition=Ready pod --all -n crust --timeout=60s
 
-        for rps in "${RPS_LIST[@]}"; do
+        for (( rps = 10; rps <= 500; rps += 10 )); do
             echo "--- Replicas: ${i}, RPS: ${rps} ---"
 
             FOLDER_NAME="${SCRIPT_DIR}/results/${i}_${rps}"
@@ -42,6 +41,9 @@ run_experiment() {
             ssh $SSH_OPTS $WORKER "sudo /local/ebpf-probe/build/ebpf_probe -i ${WORKER_IF} > /tmp/ebpf_probe.log 2>&1" &
             EBPF_PROBE_PID=$!
 
+            # Logs metrics to /tmp/ebpf_probe/summary.log. Non blocking, prints its own PID
+            ssh $SSH_OPTS $WORKER "/local/ebpf-probe/scripts/gather_cpu_metrics.sh 10 20"
+
             # Wait until the probe has actually attached before generating load
             until ssh $SSH_OPTS $WORKER "sudo test -e /sys/fs/bpf/ebpf_probe/cpu0/${WORKER_IF}"; do
                 sleep 0.2
@@ -49,13 +51,12 @@ run_experiment() {
 
             run_rate "${rps}" "10s" "${FOLDER_NAME}/vegeta.log"
 
-            ssh $SSH_OPTS $WORKER "sudo bash -c 'cat /sys/fs/bpf/ebpf_probe/cpu*/summary'"      > "${FOLDER_NAME}/summary.log"
-            ssh $SSH_OPTS $WORKER "sudo bash -c 'cat /sys/fs/bpf/ebpf_probe/cpu*/${WORKER_IF}'" > "${FOLDER_NAME}/${WORKER_IF}.log"
+            scp $WORKER:/tmp/ebpf_probe/summary.log "${FOLDER_NAME}/summary.log"
+
+            kill ${EBPF_PROBE_PID}
 
             # Kill eBPF Probe on worker node to reset stats
             ssh $SSH_OPTS $WORKER "sudo pkill -f ebpf_probe"
-
-            kill ${EBPF_PROBE_PID}
         done
     done
 
