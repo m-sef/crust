@@ -38,9 +38,14 @@ run_experiment() {
             FOLDER_NAME="${SCRIPT_DIR}/results/${i}_${rps}"
             mkdir -p $FOLDER_NAME
 
-            # Start eBPF Probe on worker node
-            ssh $SSH_OPTS $WORKER "sudo /local/ebpf-probe/build/ebpf_probe -i ${WORKER_IF}" 2>&1 &
+            # Start eBPF Probe on worker node (output stays on the worker, not piped back over the NIC under test)
+            ssh $SSH_OPTS $WORKER "sudo /local/ebpf-probe/build/ebpf_probe -i ${WORKER_IF} > /tmp/ebpf_probe.log 2>&1" &
             EBPF_PROBE_PID=$!
+
+            # Wait until the probe has actually attached before generating load
+            until ssh $SSH_OPTS $WORKER "sudo test -e /sys/fs/bpf/ebpf_probe/cpu0/${WORKER_IF}"; do
+                sleep 0.2
+            done
 
             run_rate "${rps}" "10s" "${FOLDER_NAME}/vegeta.log"
 
